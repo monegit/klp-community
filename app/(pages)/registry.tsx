@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { AccountData } from "@/types/user";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -9,11 +10,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-
-interface AccountData {
-  email: string;
-  password: string;
-}
 
 export default function RegistryScreen() {
   const route = useRouter();

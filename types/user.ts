@@ -1,5 +1,4 @@
-export interface UserProfile {
-  uid: string;
+export interface AccountData {
   email: string;
-  displayName?: string;
+  password: string;
 }
