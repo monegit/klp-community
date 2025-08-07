@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { AccountData } from "@/types/user";
+import { AccountData } from "@/types/account";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -40,7 +40,7 @@ export default function RegistryScreen() {
         />
       </View>
       <Button
-        title="완료"
+        title="회원가입"
         onPress={() => {
           auth
             .signUp(accountData.email, accountData.password)

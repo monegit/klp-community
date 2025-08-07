@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { AccountData } from "@/types/user";
+import { AccountData } from "@/types/account";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -58,7 +58,7 @@ export default function LoginScreen() {
           }}
         />
         <Button
-          title="회원가입"
+          title="회원가입 하러가기"
           onPress={() => {
             route.push("/registry");
           }}
