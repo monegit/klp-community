@@ -28,5 +28,5 @@ npx expo start
 
 ```
 1. React Native (expo)
-2. Firebase
+2. Firebase (Authentication, Storage, Firestore Database)
 ```
