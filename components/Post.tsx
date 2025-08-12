@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/Colors";
 import { Image as ExpoImage } from "expo-image";
 import { useRouter } from "expo-router";
 import { Pressable, Text, View } from "react-native";
@@ -14,6 +15,8 @@ type PostProps = {
   content: string;
   createdAt: string | Date | FirestoreTimestamp | null | undefined;
   images?: string[] | null;
+  userNickname?: string;
+  userPhotoURL?: string;
 };
 
 function formatCreatedAt(createdAt: PostProps["createdAt"]) {
@@ -36,6 +39,8 @@ export default function Post({
   content,
   createdAt,
   images,
+  userNickname,
+  userPhotoURL,
 }: PostProps) {
   const navigation = useRouter();
 
@@ -48,18 +53,63 @@ export default function Post({
       <View
         style={{
           padding: 16,
-          backgroundColor: "#f9f9f9",
-          borderRadius: 8,
+          backgroundColor: Colors.cardBg,
+          borderRadius: 12,
           marginBottom: 16,
+          borderWidth: 1,
+          borderColor: Colors.divider,
         }}
       >
-        <Text style={{ fontSize: 18, fontWeight: "600", marginBottom: 8 }}>
-          {title}
-        </Text>
-        <Text style={{ fontSize: 14, color: "#666", marginBottom: 8 }}>
-          {formatCreatedAt(createdAt)}
-        </Text>
-        <Text style={{ fontSize: 16, marginBottom: 12 }} numberOfLines={3}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 8,
+          }}
+        >
+          {userPhotoURL ? (
+            <ExpoImage
+              source={{ uri: userPhotoURL }}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: Colors.avatarPlaceholder,
+                marginRight: 8,
+              }}
+            />
+          ) : (
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: Colors.avatarPlaceholder,
+                marginRight: 8,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ fontSize: 10, color: Colors.subText }}>NA</Text>
+            </View>
+          )}
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{ fontSize: 16, fontWeight: "600", color: Colors.text }}
+              numberOfLines={1}
+            >
+              {title}
+            </Text>
+            <Text style={{ fontSize: 11, color: Colors.subText, marginTop: 2 }}>
+              {userNickname ? `${userNickname} · ` : ""}
+              {formatCreatedAt(createdAt)}
+            </Text>
+          </View>
+        </View>
+        <Text
+          style={{ fontSize: 16, marginBottom: 12, color: Colors.text }}
+          numberOfLines={3}
+        >
           {content}
         </Text>
         {!!images?.length && (

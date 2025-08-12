@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/Colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { db, storage } from "@/firebase.config";
 import { usePost } from "@/hooks/usePost";
@@ -134,7 +135,7 @@ export default function PostWriteScreen() {
           content: content.trim(),
           images: images.map((i) => i.uri),
           createdAt: "",
-        });
+        } as any);
         Alert.alert("완료", "게시글이 작성되었습니다.");
         setTitle("");
         setContent("");
@@ -178,7 +179,7 @@ export default function PostWriteScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.bg }}>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 20 }}>
         <Text style={{ fontSize: 20, fontWeight: "600" }}>
           {isEdit ? "게시글 수정" : "게시글 작성"}
@@ -191,7 +192,7 @@ export default function PostWriteScreen() {
             placeholder="제목을 입력하세요"
             style={{
               borderWidth: 1,
-              borderColor: "#ccc",
+              borderColor: Colors.border,
               borderRadius: 8,
               paddingHorizontal: 12,
               paddingVertical: 10,
@@ -207,7 +208,7 @@ export default function PostWriteScreen() {
             multiline
             style={{
               borderWidth: 1,
-              borderColor: "#ccc",
+              borderColor: Colors.border,
               borderRadius: 8,
               minHeight: 140,
               textAlignVertical: "top",
@@ -294,7 +295,7 @@ export default function PostWriteScreen() {
           onPress={handleSubmit}
           disabled={submitting}
           style={{
-            backgroundColor: submitting ? "#ccc" : "#34C759",
+            backgroundColor: submitting ? "#ccc" : Colors.primary,
             paddingVertical: 14,
             borderRadius: 10,
             alignItems: "center",

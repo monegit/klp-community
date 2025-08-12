@@ -7,6 +7,7 @@ import {
   deleteDoc,
   doc,
   DocumentData,
+  documentId,
   getDoc,
   getDocs,
   limit,
@@ -94,10 +95,43 @@ export const usePost = () => {
       limit(postLimit)
     );
     const snapshot = await getDocs(q);
-    const posts = snapshot.docs.map((d) => ({
-      postId: d.id,
-      ...(d.data() as Omit<PostResponse, "postId">),
-    })) as PostResponse[];
+    const basePosts = snapshot.docs.map((d) => {
+      const data = d.data() as any;
+      return {
+        postId: d.id,
+        userId: data.userId || "",
+        title: data.title || "",
+        content: data.content || "",
+        images: data.images || [],
+        createdAt: data.createdAt || "",
+        comments: data.comments || [],
+      } as PostResponse;
+    });
+    // users에서 닉네임/프로필 이미지를 병합
+    const userIds = Array.from(new Set(basePosts.map((p) => p.userId).filter(Boolean)));
+    const usersMap: Record<string, { nickname?: string; photoURL?: string }> = {};
+    const chunkSize = 10;
+    for (let i = 0; i < userIds.length; i += chunkSize) {
+      const chunk = userIds.slice(i, i + chunkSize);
+      try {
+        const uq = query(collection(db, "users"), where(documentId(), "in", chunk));
+        const usnap = await getDocs(uq);
+        usnap.forEach((ud) => {
+          const u: any = ud.data();
+          usersMap[ud.id] = {
+            nickname: u?.nickname ?? undefined,
+            photoURL: (u?.profileImageURL ?? u?.photoURL) ?? undefined,
+          };
+        });
+      } catch (e) {
+        console.warn("users 병합 조회 실패", e);
+      }
+    }
+    const posts = basePosts.map((p) => ({
+      ...p,
+      userNickname: usersMap[p.userId]?.nickname || "",
+      userPhotoURL: usersMap[p.userId]?.photoURL || "",
+    }));
     const lastDoc = snapshot.docs[snapshot.docs.length - 1];
 
     _listCache = { posts, lastDoc, ts: now, limit: postLimit };
@@ -123,10 +157,43 @@ export const usePost = () => {
       limit(pageLimit)
     );
     const snapshot = await getDocs(q);
-    const newPosts = snapshot.docs.map((d) => ({
-      postId: d.id,
-      ...(d.data() as Omit<PostResponse, "postId">),
-    })) as PostResponse[];
+    const basePosts = snapshot.docs.map((d) => {
+      const data = d.data() as any;
+      return {
+        postId: d.id,
+        userId: data.userId || "",
+        title: data.title || "",
+        content: data.content || "",
+        images: data.images || [],
+        createdAt: data.createdAt || "",
+        comments: data.comments || [],
+      } as PostResponse;
+    });
+    // users 병합
+    const userIds = Array.from(new Set(basePosts.map((p) => p.userId).filter(Boolean)));
+    const usersMap: Record<string, { nickname?: string; photoURL?: string }> = {};
+    const chunkSize = 10;
+    for (let i = 0; i < userIds.length; i += chunkSize) {
+      const chunk = userIds.slice(i, i + chunkSize);
+      try {
+        const uq = query(collection(db, "users"), where(documentId(), "in", chunk));
+        const usnap = await getDocs(uq);
+        usnap.forEach((ud) => {
+          const u: any = ud.data();
+          usersMap[ud.id] = {
+            nickname: u?.nickname ?? undefined,
+            photoURL: (u?.profileImageURL ?? u?.photoURL) ?? undefined,
+          };
+        });
+      } catch (e) {
+        console.warn("users 병합 조회 실패", e);
+      }
+    }
+    const newPosts = basePosts.map((p) => ({
+      ...p,
+      userNickname: usersMap[p.userId]?.nickname || "",
+      userPhotoURL: usersMap[p.userId]?.photoURL || "",
+    }));
     const newLast = snapshot.docs[snapshot.docs.length - 1];
 
     if (_listCache) {
@@ -151,10 +218,33 @@ export const usePost = () => {
     const refDoc = doc(db, "posts", postId);
     const snap = await getDoc(refDoc);
     if (!snap.exists()) return { post: null, fromCache: false };
-    const post = {
+    const data = snap.data() as any;
+    // users에서 프로필 정보 별도 조회
+    let userNickname = "";
+    let userPhotoURL = "";
+    try {
+      if (data.userId) {
+        const usnap = await getDoc(doc(db, "users", data.userId));
+        if (usnap.exists()) {
+          const u: any = usnap.data();
+          userNickname = u?.nickname || "";
+          userPhotoURL = (u?.profileImageURL ?? u?.photoURL) || "";
+        }
+      }
+    } catch (e) {
+      console.warn("users 단건 조회 실패", e);
+    }
+    const post: PostResponse = {
       postId: snap.id,
-      ...(snap.data() as Omit<PostResponse, "postId">),
-    } as PostResponse;
+      userId: data.userId || "",
+      userNickname,
+      userPhotoURL,
+      title: data.title || "",
+      content: data.content || "",
+      images: data.images || [],
+      createdAt: data.createdAt || "",
+      comments: data.comments || [],
+    };
     _detailCache.set(postId, post);
     return { post, fromCache: false };
   };
@@ -179,6 +269,8 @@ export const usePost = () => {
       postId: req.postId,
       userId: req.userId,
       comment: req.comment,
+      userNickname: (req as any).userNickname || null,
+      userPhotoURL: (req as any).userPhotoURL || null,
       createdAt: serverTimestamp(),
     });
     return docRef.id;
@@ -203,6 +295,8 @@ export const usePost = () => {
           postId: (d.data() as any).postId || postId,
           userId: (d.data() as any).userId || "",
           comment: (d.data() as any).comment || "",
+          userNickname: (d.data() as any).userNickname || "",
+          userPhotoURL: (d.data() as any).userPhotoURL || "",
           createdAt: (() => {
             const c: any = (d.data() as any).createdAt;
             if (!c) return "";
@@ -228,20 +322,25 @@ export const usePost = () => {
       limit(max)
     );
     const snap = await getDocs(q);
-    return snap.docs.map((d) => ({
-      commentId: d.id,
-      postId: (d.data() as any).postId || postId,
-      userId: (d.data() as any).userId || "",
-      comment: (d.data() as any).comment || "",
-      createdAt: (() => {
-        const c: any = (d.data() as any).createdAt;
-        if (!c) return "";
-        if (typeof c === "string") return c;
-        if (typeof c?.toDate === "function") return c.toDate().toISOString();
-        if (c?.seconds) return new Date(c.seconds * 1000).toISOString();
-        return String(c);
-      })(),
-    }));
+    return snap.docs.map((d) => {
+      const data = d.data() as any;
+      return {
+        commentId: d.id,
+        postId: data.postId || postId,
+        userId: data.userId || "",
+        comment: data.comment || "",
+        userNickname: data.userNickname || "",
+        userPhotoURL: data.userPhotoURL || "",
+        createdAt: (() => {
+          const c: any = data.createdAt;
+          if (!c) return "";
+          if (typeof c === "string") return c;
+          if (typeof c?.toDate === "function") return c.toDate().toISOString();
+          if (c?.seconds) return new Date(c.seconds * 1000).toISOString();
+          return String(c);
+        })(),
+      } as Comment;
+    });
   };
 
   return {
@@ -255,4 +354,10 @@ export const usePost = () => {
     subscribeComments,
     getComments,
   };
+};
+
+// 외부에서 목록/상세 캐시를 비우기 위한 헬퍼 (닉네임/프로필 변경 시 사용)
+export const clearPostCaches = () => {
+  _listCache = null;
+  _detailCache.clear();
 };
