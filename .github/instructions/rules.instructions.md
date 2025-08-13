@@ -20,6 +20,8 @@
 - fetch 데이터 타입의 경우 `...ResponseParams`, `...RequestParams`와 같이 명명합니다.
 - 공통적으로 쓰이는 컴포넌트는 해당 컴포넌트 이름 그대로 사용하며 `components/common` 폴더에 위치시킵니다.
   - 예: `Button.tsx`, `TextInput.tsx`.
+- fetch 데이터의 코드는 services 폴더에 위치시킵니다.
+  - 예: `getPostList.ts`, `postWritePost.ts`.
 
 ## 성능 일관성
 

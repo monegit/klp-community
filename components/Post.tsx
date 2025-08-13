@@ -15,8 +15,8 @@ type PostProps = {
   content: string;
   createdAt: string | Date | FirestoreTimestamp | null | undefined;
   images?: string[] | null;
-  userNickname?: string;
-  userPhotoURL?: string;
+  nickname?: string;
+  profileImageURL?: string;
 };
 
 function formatCreatedAt(createdAt: PostProps["createdAt"]) {
@@ -39,8 +39,8 @@ export default function Post({
   content,
   createdAt,
   images,
-  userNickname,
-  userPhotoURL,
+  nickname,
+  profileImageURL,
 }: PostProps) {
   const navigation = useRouter();
 
@@ -67,9 +67,9 @@ export default function Post({
             marginBottom: 8,
           }}
         >
-          {userPhotoURL ? (
+          {profileImageURL ? (
             <ExpoImage
-              source={{ uri: userPhotoURL }}
+              source={{ uri: profileImageURL }}
               style={{
                 width: 32,
                 height: 32,
@@ -101,7 +101,7 @@ export default function Post({
               {title}
             </Text>
             <Text style={{ fontSize: 11, color: Colors.subText, marginTop: 2 }}>
-              {userNickname ? `${userNickname} · ` : ""}
+              {nickname ? `${nickname} · ` : ""}
               {formatCreatedAt(createdAt)}
             </Text>
           </View>

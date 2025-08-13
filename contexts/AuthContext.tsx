@@ -9,9 +9,9 @@ import {
   collection,
   doc,
   documentId,
+  limit as fsLimit,
   getDoc,
   getDocs,
-  limit as fsLimit,
   orderBy,
   query,
   setDoc,
@@ -23,7 +23,6 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { auth, db, storage } from "../firebase.config";
-import { clearPostCaches } from "@/hooks/usePost";
 
 interface AuthContextType {
   user: User | null;
@@ -141,7 +140,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       };
       await updateCollectionField("posts");
       await updateCollectionField("comments");
-      clearPostCaches();
+      // clearPostCaches();
     } catch (e) {
       // 백필 실패는 앱 동작에 치명적이지 않으므로 경고만
       console.warn("닉네임 백필 실패", e);
@@ -184,7 +183,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const snap = await getDocs(q);
           if (snap.empty) break;
           const batch = writeBatch(db);
-          for (const d of snap.docs) batch.update(doc(db, colName, d.id), { userPhotoURL: url });
+          for (const d of snap.docs)
+            batch.update(doc(db, colName, d.id), { userPhotoURL: url });
           await batch.commit();
           last = snap.docs[snap.docs.length - 1];
           if (snap.size < pageSize) break;
@@ -192,7 +192,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       };
       await updateCollectionField("posts");
       await updateCollectionField("comments");
-      clearPostCaches();
+      // clearPostCaches();
     } catch (e) {
       console.warn("프로필 이미지 백필 실패", e);
     }

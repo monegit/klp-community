@@ -74,8 +74,8 @@ export default function PostDetailScreen() {
           const loaded: PostResponse = {
             postId: docSnap.id,
             userId: data.userId || "",
-            userNickname: data.userNickname || "",
-            userPhotoURL: data.userPhotoURL || "",
+            nickname: data.nickname || "",
+            profileImageURL: data.profileImageURL || "",
             title: data.title || "",
             content: data.content || "",
             images: data.images || [],
@@ -114,8 +114,8 @@ export default function PostDetailScreen() {
               setPost({
                 postId: docSnap.id,
                 userId: data.userId || "",
-                userNickname: data.userNickname || "",
-                userPhotoURL: data.userPhotoURL || "",
+                nickname: data.userNickname || "",
+                profileImageURL: data.userPhotoURL || "",
                 title: data.title || "",
                 content: data.content || "",
                 images: data.images || [],
@@ -263,9 +263,9 @@ export default function PostDetailScreen() {
                 marginTop: 6,
               }}
             >
-              {post.userPhotoURL ? (
+              {post.profileImageURL ? (
                 <Image
-                  source={{ uri: post.userPhotoURL }}
+                  source={{ uri: post.profileImageURL }}
                   style={{
                     width: 28,
                     height: 28,
@@ -286,7 +286,7 @@ export default function PostDetailScreen() {
                 />
               )}
               <Text style={{ color: Colors.subText, fontSize: 12 }}>
-                {post.userNickname ? `${post.userNickname} · ` : ""}
+                {post.nickname ? `${post.nickname} · ` : ""}
                 {formatCreatedAt(post.createdAt)}
               </Text>
             </View>
