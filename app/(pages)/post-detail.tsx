@@ -15,12 +15,10 @@ import {
 
 import { Colors } from "@/constants/Colors";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePost } from "@/hooks/usePost";
 import { fetchPostDelete } from "@/services/post";
 import { usePostDetail } from "./_hooks/usePostDetail";
 
 export default function PostDetailScreen() {
-  const { getPostDetail } = usePost();
   const {
     onPostDetailLoad,
     userData,
@@ -30,25 +28,28 @@ export default function PostDetailScreen() {
     refreshComments,
   } = usePostDetail();
 
-  const { postId, rev } = useLocalSearchParams();
+  const { postId } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false); // 전체 화면 로딩
   const [commentsRefreshing, setCommentsRefreshing] = useState(false); // 댓글 갱신 로딩
   const [commentInput, setCommentInput] = useState("");
-  const [sending, setSending] = useState(false);
 
   const isOwner = !!user && !!postData && user.uid === postData.userId;
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!postId) return;
+    setLoading(true);
     onPostDetailLoad(postId as string);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
     if (!postId) return;
+    setCommentsRefreshing(true);
     refreshComments(postId as string);
+    setCommentsRefreshing(false);
   }, [postId]);
 
   useEffect(() => {
@@ -57,9 +58,9 @@ export default function PostDetailScreen() {
     }
   }, [postData?.images]);
 
-  useEffect(() => {
-    getPostDetail(postId as string);
-  }, []);
+  // useEffect(() => {
+  //   getPostDetail(postId as string);
+  // }, []);
 
   const formatCreatedAt = (input: any): string => {
     if (!input) return "";
@@ -361,7 +362,6 @@ export default function PostDetailScreen() {
           value={commentInput}
           onChangeText={setCommentInput}
           placeholder={user ? "댓글 입력..." : "로그인 후 작성 가능"}
-          editable={!!user && !sending}
           style={{
             flex: 1,
             borderWidth: 1,
@@ -375,20 +375,16 @@ export default function PostDetailScreen() {
         />
         <Pressable
           onPress={() => onCommentSubmit(postId as string)}
-          disabled={!user || sending || !commentInput.trim()}
+          disabled={!user || !commentInput.trim()}
           style={{
             justifyContent: "center",
             paddingHorizontal: 16,
             backgroundColor:
-              !user || sending || !commentInput.trim()
-                ? "#ccc"
-                : Colors.primary,
+              !user || !commentInput.trim() ? "#ccc" : Colors.primary,
             borderRadius: 20,
           }}
         >
-          <Text style={{ color: "#fff", fontWeight: "600" }}>
-            {sending ? "..." : "전송"}
-          </Text>
+          <Text style={{ color: "#fff", fontWeight: "600" }}>...</Text>
         </Pressable>
       </View>
     </SafeAreaView>

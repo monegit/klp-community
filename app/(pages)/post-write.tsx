@@ -1,8 +1,3 @@
-import { Colors } from "@/constants/Colors";
-import { useAuth } from "@/contexts/AuthContext";
-import { db, storage } from "@/firebase.config";
-import { usePost } from "@/hooks/usePost";
-import { markPostDirty } from "@/lib/postRefresh";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
@@ -19,6 +14,12 @@ import {
   TextInput,
   View,
 } from "react-native";
+
+import { Colors } from "@/constants/Colors";
+import { useAuth } from "@/contexts/AuthContext";
+import { db, storage } from "@/firebase.config";
+import { usePost } from "@/hooks/usePost";
+import { markPostDirty } from "@/lib/postRefresh";
 
 interface ImageItem {
   uri: string;
