@@ -1,3 +1,4 @@
+import { AppButton } from "@/components/common/Button";
 import React from "react";
 import {
   ActivityIndicator,
@@ -85,21 +86,11 @@ export default function ProfileEditScreen() {
             }}
             editable={!isSaveNickname}
           />
-          <Pressable
+          <AppButton
+            title={isSaveNickname ? "저장 중..." : "닉네임 저장"}
             onPress={onSaveNickname}
             disabled={isSaveNickname || !nickname.trim()}
-            style={{
-              backgroundColor:
-                isSaveNickname || !nickname.trim() ? "#ccc" : "#34C759",
-              paddingVertical: 12,
-              borderRadius: 8,
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: "#fff", fontWeight: "600" }}>
-              {isSaveNickname ? "저장 중..." : "닉네임 저장"}
-            </Text>
-          </Pressable>
+          />
         </View>
 
         <View style={{ gap: 12 }}>
