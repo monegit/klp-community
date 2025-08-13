@@ -1,9 +1,9 @@
-export interface AccountData {
+export interface UserData {
   email: string;
   password: string;
 }
 
-export interface AccountProfile {
+export interface UserProfile {
   nickname?: string;
   profileImageURL?: string;
 }

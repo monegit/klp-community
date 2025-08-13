@@ -1,11 +1,11 @@
-export interface Comment {
+import { UserProfile } from "./user";
+
+export interface Comment extends UserProfile {
   commentId: string;
   postId: string;
   userId: string;
   comment: string;
   createdAt: string;
-  userNickname?: string;
-  userPhotoURL?: string;
 }
 
 export interface CreateCommentRequest {

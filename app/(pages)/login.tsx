@@ -1,6 +1,6 @@
 import { AppButton } from "@/components/common/Button";
 import { useAuth } from "@/contexts/AuthContext";
-import { AccountData } from "@/types/account";
+import { UserData } from "@/types/user";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -19,7 +19,7 @@ export default function LoginScreen() {
   const route = useRouter();
   const auth = useAuth();
 
-  const [accountData, setAccountData] = useState<AccountData>({
+  const [accountData, setAccountData] = useState<UserData>({
     email: "",
     password: "",
   });

@@ -1,6 +1,3 @@
-import { AppButton } from "@/components/common/Button";
-import { useAuth } from "@/contexts/AuthContext";
-import { AccountData } from "@/types/account";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -15,12 +12,16 @@ import {
   View,
 } from "react-native";
 
+import { AppButton } from "@/components/common/Button";
+import { useAuth } from "@/contexts/AuthContext";
+import { UserData } from "@/types/user";
+
 export default function RegistryScreen() {
   const route = useRouter();
   const auth = useAuth();
 
   const [accountData, setAccountData] = useState<
-    AccountData & { nickname: string }
+    UserData & { nickname: string }
   >({
     email: "",
     password: "",

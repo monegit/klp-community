@@ -1,13 +1,5 @@
-import { Colors } from "@/constants/Colors";
-import { useAuth } from "@/contexts/AuthContext";
-import { db } from "@/firebase.config";
-import { usePost } from "@/hooks/usePost";
-import { consumePostDirty } from "@/lib/postRefresh";
-import { Comment } from "@/types/comment";
-import { PostResponse } from "@/types/post";
 import { Image } from "expo-image";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { doc, getDoc } from "firebase/firestore";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -21,161 +13,73 @@ import {
   View,
 } from "react-native";
 
+import { Colors } from "@/constants/Colors";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePost } from "@/hooks/usePost";
+import { fetchPostDelete } from "@/services/post";
+import { usePostDetail } from "./_hooks/usePostDetail";
+
 export default function PostDetailScreen() {
+  const { getPostDetail } = usePost();
+  const {
+    onPostDetailLoad,
+    userData,
+    postData,
+    onCommentSubmit,
+    comments,
+    refreshComments,
+  } = usePostDetail();
+
   const { postId, rev } = useLocalSearchParams();
-  const { addComment, getComments, deletePost } = usePost();
   const router = useRouter();
-  const { user, profile } = useAuth();
-  const [post, setPost] = useState<PostResponse | null>(null);
-  const [loading, setLoading] = useState(true); // 전체 화면 로딩
-  const [comments, setComments] = useState<Comment[]>([]);
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false); // 전체 화면 로딩
   const [commentsRefreshing, setCommentsRefreshing] = useState(false); // 댓글 갱신 로딩
   const [commentInput, setCommentInput] = useState("");
   const [sending, setSending] = useState(false);
-  // 소유자 여부
-  const isOwner = !!user && !!post && user.uid === post.userId;
+
+  const isOwner = !!user && !!postData && user.uid === postData.userId;
   const [deleting, setDeleting] = useState(false);
 
-  // 댓글 새로고침 함수 (useCallback 제거로 의존성 루프 방지)
-  const refreshComments = async () => {
-    if (!postId) return;
-    try {
-      if (commentsRefreshing) return; // 중복 호출 방지
-      setCommentsRefreshing(true);
-      const list = await getComments(postId as string);
-      setComments(list);
-    } catch (e) {
-      console.warn("댓글 로드 실패", e);
-    } finally {
-      setCommentsRefreshing(false);
-    }
-  };
-
-  // 게시글 로드
-  useEffect(() => {
-    const fetchPost = async () => {
-      if (!postId) return;
-      try {
-        const docRef = doc(db, "posts", postId as string);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data() as Partial<PostResponse> & {
-            createdAt?: any;
-          };
-          const createdAtValue = (() => {
-            const c = data.createdAt;
-            if (!c) return "";
-            if (typeof c === "string") return c;
-            if (typeof c?.toDate === "function")
-              return c.toDate().toISOString();
-            if (c?.seconds) return new Date(c.seconds * 1000).toISOString();
-            return String(c);
-          })();
-          const loaded: PostResponse = {
-            postId: docSnap.id,
-            userId: data.userId || "",
-            nickname: data.nickname || "",
-            profileImageURL: data.profileImageURL || "",
-            title: data.title || "",
-            content: data.content || "",
-            images: data.images || [],
-            createdAt: createdAtValue,
-            comments: data.comments || [],
-          };
-          setPost(loaded);
-        }
-      } catch (error) {
-        console.error("Error fetching post:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPost();
-  }, [postId, rev]);
-
-  // focus 될 때 더티 플래그 있으면 강제 재조회
-  useFocusEffect(
-    React.useCallback(() => {
-      if (!postId) return;
-      if (consumePostDirty(postId as string)) {
-        (async () => {
-          setLoading(true);
-          try {
-            const docRef = doc(db, "posts", postId as string);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-              const data = docSnap.data() as any;
-              const c = data.createdAt;
-              const createdAtValue = c?.toDate
-                ? c.toDate().toISOString()
-                : c?.seconds
-                ? new Date(c.seconds * 1000).toISOString()
-                : "";
-              setPost({
-                postId: docSnap.id,
-                userId: data.userId || "",
-                nickname: data.userNickname || "",
-                profileImageURL: data.userPhotoURL || "",
-                title: data.title || "",
-                content: data.content || "",
-                images: data.images || [],
-                createdAt: createdAtValue,
-                comments: data.comments || [],
-              });
-            }
-          } catch (e) {
-            console.warn("post refresh failed", e);
-          } finally {
-            setLoading(false);
-          }
-        })();
-      }
-    }, [postId])
-  );
-
-  // 최초 1회 댓글 로드 (postId 변경시에만)
   useEffect(() => {
     if (!postId) return;
-    refreshComments();
-    // getComments 참조 변화로 재호출되는 것을 막기 위해 의존성 최소화
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    onPostDetailLoad(postId as string);
+  }, []);
+
+  useEffect(() => {
+    if (!postId) return;
+    refreshComments(postId as string);
   }, [postId]);
 
-  // 이미지 프리패치
   useEffect(() => {
-    if (post?.images?.length) {
-      Image.prefetch(post.images.slice(0, 3)); // 처음 3개만 프리패치
+    if (postData?.images?.length) {
+      Image.prefetch(postData.images.slice(0, 3)); // 처음 3개만 프리패치
     }
-  }, [post?.images]);
+  }, [postData?.images]);
 
-  const formatCreatedAt = (createdAt: string) => {
-    if (!createdAt) return "";
-    const d = new Date(createdAt);
-    if (isNaN(d.getTime())) return createdAt;
-    return d.toLocaleString();
-  };
+  useEffect(() => {
+    getPostDetail(postId as string);
+  }, []);
 
-  const onSend = async () => {
-    if (!user) return; // 로그인 필요
-    if (!commentInput.trim()) return;
-    if (!postId) return;
-    try {
-      setSending(true);
-      await addComment({
-        postId: postId as string,
-        userId: user.uid,
-        comment: commentInput.trim(),
-        userNickname: profile?.nickname || "",
-        userPhotoURL: profile?.photoURL || "",
-      });
-      setCommentInput("");
-      // 작성 직후 수동 새로고침 (실시간 제거했으므로)
-      refreshComments();
-    } catch (e) {
-      console.warn("댓글 등록 실패", e);
-    } finally {
-      setSending(false);
+  const formatCreatedAt = (input: any): string => {
+    if (!input) return "";
+    // Firestore Timestamp 형태 처리
+    if (typeof input?.toDate === "function") {
+      try {
+        return input.toDate().toLocaleString();
+      } catch {}
     }
+    if (typeof input?.seconds === "number") {
+      return new Date(input.seconds * 1000).toLocaleString();
+    }
+    if (input instanceof Date) {
+      return input.toLocaleString();
+    }
+    if (typeof input === "string" || typeof input === "number") {
+      const d = new Date(input);
+      return isNaN(d.getTime()) ? String(input) : d.toLocaleString();
+    }
+    return "";
   };
 
   if (loading) {
@@ -189,7 +93,7 @@ export default function PostDetailScreen() {
     );
   }
 
-  if (!post) {
+  if (!postData) {
     return (
       <SafeAreaView
         style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
@@ -217,7 +121,7 @@ export default function PostDetailScreen() {
         onPress: async () => {
           try {
             setDeleting(true);
-            await deletePost(postId as string);
+            await fetchPostDelete(postId as string);
             Alert.alert("완료", "삭제되었습니다.");
             router.back();
           } catch {
@@ -236,7 +140,7 @@ export default function PostDetailScreen() {
         refreshControl={
           <RefreshControl
             refreshing={commentsRefreshing}
-            onRefresh={refreshComments}
+            onRefresh={() => refreshComments(postId as string)}
           />
         }
         contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 120 }}
@@ -254,7 +158,7 @@ export default function PostDetailScreen() {
               style={{ fontSize: 20, fontWeight: "600", color: Colors.text }}
               numberOfLines={2}
             >
-              {post.title}
+              {postData.title}
             </Text>
             <View
               style={{
@@ -263,9 +167,9 @@ export default function PostDetailScreen() {
                 marginTop: 6,
               }}
             >
-              {post.profileImageURL ? (
+              {userData?.profileImageURL ? (
                 <Image
-                  source={{ uri: post.profileImageURL }}
+                  source={{ uri: userData.profileImageURL }}
                   style={{
                     width: 28,
                     height: 28,
@@ -286,8 +190,8 @@ export default function PostDetailScreen() {
                 />
               )}
               <Text style={{ color: Colors.subText, fontSize: 12 }}>
-                {post.nickname ? `${post.nickname} · ` : ""}
-                {formatCreatedAt(post.createdAt)}
+                {userData?.nickname ? `${userData.nickname} · ` : ""}
+                {formatCreatedAt(postData.createdAt)}
               </Text>
             </View>
           </View>
@@ -323,11 +227,11 @@ export default function PostDetailScreen() {
         </View>
         {/* 상단으로 이동했으므로 제거 */}
         <Text style={{ fontSize: 14, lineHeight: 20, color: Colors.text }}>
-          {post.content}
+          {postData.content}
         </Text>
-        {!!post.images.length && (
+        {!!postData.images.length && (
           <View style={{ gap: 12 }}>
-            {post.images.map((url) => (
+            {postData.images.map((url) => (
               <Image
                 key={url}
                 source={{ uri: url }}
@@ -363,7 +267,7 @@ export default function PostDetailScreen() {
               댓글 {comments.length}
             </Text>
             <Pressable
-              onPress={refreshComments}
+              onPress={() => refreshComments(postId as string)}
               disabled={commentsRefreshing}
               style={{
                 paddingHorizontal: 12,
@@ -377,9 +281,9 @@ export default function PostDetailScreen() {
               </Text>
             </Pressable>
           </View>
-          {comments.map((c) => (
+          {comments.map((comment) => (
             <View
-              key={c.commentId}
+              key={comment.commentId}
               style={{
                 flexDirection: "row",
                 gap: 10,
@@ -388,9 +292,9 @@ export default function PostDetailScreen() {
                 borderBottomColor: Colors.divider,
               }}
             >
-              {c.userPhotoURL ? (
+              {comment.profileImageURL ? (
                 <Image
-                  source={{ uri: c.userPhotoURL }}
+                  source={{ uri: comment.profileImageURL }}
                   style={{
                     width: 28,
                     height: 28,
@@ -416,19 +320,19 @@ export default function PostDetailScreen() {
                     gap: 6,
                   }}
                 >
-                  {!!c.userNickname && (
+                  {!!comment.nickname && (
                     <Text style={{ fontSize: 12, color: Colors.subText }}>
-                      {c.userNickname}
+                      {comment.nickname}
                     </Text>
                   )}
                   <Text style={{ fontSize: 10, color: Colors.muted }}>
-                    {formatCreatedAt(c.createdAt)}
+                    {formatCreatedAt(comment.createdAt)}
                   </Text>
                 </View>
                 <Text
                   style={{ fontSize: 14, color: Colors.text, marginTop: 2 }}
                 >
-                  {c.comment}
+                  {comment.comment}
                 </Text>
               </View>
             </View>
@@ -470,7 +374,7 @@ export default function PostDetailScreen() {
           multiline
         />
         <Pressable
-          onPress={onSend}
+          onPress={() => onCommentSubmit(postId as string)}
           disabled={!user || sending || !commentInput.trim()}
           style={{
             justifyContent: "center",
