@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -82,7 +83,14 @@ const fetchCommentedList = async (postId: string) => {
 
 const fetchPostDelete = async (postId: string) => {
   try {
-    await getDoc(doc(db, "posts", postId));
+    const response = await getDoc(doc(db, "posts", postId));
+
+    if (!response.exists()) {
+      console.error("Post does not exist:", postId);
+      return;
+    }
+
+    await deleteDoc(response.ref);
   } catch (error) {
     console.error("Error deleting post:", error);
   }
