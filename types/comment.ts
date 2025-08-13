@@ -13,5 +13,5 @@ export interface CreateCommentRequest {
   userId: string;
   comment: string;
   userNickname?: string;
-  userPhotoURL?: string;
+  userProfileImageURL?: string;
 }

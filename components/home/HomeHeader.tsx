@@ -33,9 +33,9 @@ export const HomeHeader: React.FC<Props> = ({ pageSize, setPageSize }) => {
           paddingVertical: 4,
         }}
       >
-        {profile?.photoURL ? (
+        {profile?.profileImageURL ? (
           <Image
-            source={{ uri: profile.photoURL }}
+            source={{ uri: profile.profileImageURL }}
             style={{
               width: 56,
               height: 56,
@@ -73,32 +73,7 @@ export const HomeHeader: React.FC<Props> = ({ pageSize, setPageSize }) => {
           gap: 8,
           marginTop: 12,
         }}
-      >
-        <Text style={{ color: Colors.subText, fontSize: 12 }}>표시 개수:</Text>
-        {[10, 20, 50].map((n) => (
-          <Pressable
-            key={n}
-            onPress={() => setPageSize(n)}
-            style={{
-              paddingHorizontal: 10,
-              paddingVertical: 6,
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: n === pageSize ? Colors.primary : Colors.border,
-              backgroundColor: n === pageSize ? Colors.primary : "transparent",
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 12,
-                color: n === pageSize ? "#fff" : Colors.text,
-              }}
-            >
-              {n}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
+      ></View>
     </View>
   );
 };

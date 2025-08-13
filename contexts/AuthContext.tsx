@@ -27,7 +27,7 @@ import { auth, db, storage } from "../firebase.config";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  profile: { nickname?: string; photoURL?: string } | null;
+  profile: { nickname?: string; profileImageURL?: string } | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, nickname: string) => Promise<void>;
   updateNickname: (nickname: string) => Promise<void>;
@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<{
     nickname?: string;
-    photoURL?: string;
+    profileImageURL?: string;
   } | null>(null);
 
   useEffect(() => {
@@ -65,7 +65,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const snap = await getDoc(doc(db, "users", u.uid));
           if (snap.exists()) {
             const data: any = snap.data();
-            setProfile({ nickname: data.nickname, photoURL: data.photoURL });
+            setProfile({
+              nickname: data.nickname,
+              profileImageURL: data.profileImageURL,
+            });
           } else {
             setProfile(null);
           }
@@ -87,7 +90,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const snap = await getDoc(doc(db, "users", cred.user.uid));
       if (snap.exists()) {
         const data: any = snap.data();
-        setProfile({ nickname: data.nickname, photoURL: data.photoURL });
+        setProfile({
+          nickname: data.nickname,
+          profileImageURL: data.profileImageURL,
+        });
       }
     } catch {}
   };
@@ -97,10 +103,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(cred.user);
     await setDoc(doc(db, "users", cred.user.uid), {
       nickname,
-      photoURL: "",
+      profileImageURL: "",
       createdAt: Date.now(),
     });
-    setProfile({ nickname, photoURL: "" });
+    setProfile({ nickname, profileImageURL: "" });
   };
 
   const updateNickname = async (nickname: string) => {
@@ -162,10 +168,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const url = await getDownloadURL(storageRef);
     await setDoc(
       doc(db, "users", user.uid),
-      { photoURL: url, updatedAt: Date.now() },
+      { profileImageURL: url, updatedAt: Date.now() },
       { merge: true }
     );
-    setProfile((prev) => ({ ...(prev ?? {}), photoURL: url }));
+    setProfile((prev) => ({ ...(prev ?? {}), profileImageURL: url }));
 
     // 기존 게시글/댓글의 캐시된 프로필 이미지 URL을 일괄 갱신
     try {
@@ -184,7 +190,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           if (snap.empty) break;
           const batch = writeBatch(db);
           for (const d of snap.docs)
-            batch.update(doc(db, colName, d.id), { userPhotoURL: url });
+            batch.update(doc(db, colName, d.id), { profileImageURL: url });
           await batch.commit();
           last = snap.docs[snap.docs.length - 1];
           if (snap.size < pageSize) break;

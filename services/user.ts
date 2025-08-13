@@ -36,7 +36,7 @@ const fetchUserProfileImagesByIds = async (
       response.forEach((doc) => {
         result[doc.id] = {
           nickname: doc.data().nickname || "",
-          profileImageURL: doc.data().photoURL || "",
+          profileImageURL: doc.data().profileImageURL || "",
         };
       });
     } catch (error) {
@@ -56,8 +56,6 @@ const fetchUserProfilesByIds = async (userIds: string[]) => {
   const chunkSize = 10;
 
   for (let i = 0; i < uniqueIds.length; i += chunkSize) {
-    const chunk = uniqueIds.slice(i, i + chunkSize);
-
     try {
       const q = query(
         collection(db, "users"),
@@ -70,7 +68,7 @@ const fetchUserProfilesByIds = async (userIds: string[]) => {
         const data = doc.data();
         result[doc.id] = {
           nickname: data.nickname || "",
-          profileImageURL: data.photoURL || "",
+          profileImageURL: data.profileImageURL || "",
         };
       });
     } catch (error) {
@@ -90,7 +88,7 @@ const fetchUserProfileById = async (userId: string): Promise<UserProfile> => {
 
       return {
         nickname: userData.nickname ?? "",
-        profileImageURL: userData.photoURL ?? "",
+        profileImageURL: userData.profileImageURL ?? "",
       };
     }
 
