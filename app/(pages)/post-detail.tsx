@@ -24,9 +24,11 @@ export default function PostDetailScreen() {
     onPostDetailLoad,
     userData,
     postData,
-    onCommentSubmit,
+    handleSubmitComment,
     comments,
+    commentInput,
     refreshComments,
+    setCommentInput,
   } = usePostDetail();
 
   const { postId } = useLocalSearchParams();
@@ -34,7 +36,6 @@ export default function PostDetailScreen() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false); // 전체 화면 로딩
   const [commentsRefreshing, setCommentsRefreshing] = useState(false); // 댓글 갱신 로딩
-  const [commentInput, setCommentInput] = useState("");
 
   const isOwner = !!user && !!postData && user.uid === postData.userId;
   const [deleting, setDeleting] = useState(false);
@@ -350,8 +351,8 @@ export default function PostDetailScreen() {
           multiline
         />
         <Pressable
-          onPress={() => onCommentSubmit(postId as string)}
-          disabled={!user || !commentInput.trim()}
+          onPress={() => handleSubmitComment(commentInput)}
+          // disabled={!user || !commentInput.trim()}
           style={{
             justifyContent: "center",
             paddingHorizontal: 16,
@@ -360,7 +361,7 @@ export default function PostDetailScreen() {
             borderRadius: 20,
           }}
         >
-          <Text style={{ color: "#fff", fontWeight: "600" }}>...</Text>
+          <Text style={{ color: "#fff", fontWeight: "600" }}>등록</Text>
         </Pressable>
       </View>
     </SafeAreaView>

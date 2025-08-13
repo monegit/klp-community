@@ -1,4 +1,4 @@
-import { fetchComment, fetchCommentedList } from "@/services/post";
+import { fetchComment, fetchCommentedList } from "@/services/comment";
 import { Comment } from "@/types/comment";
 
 export const useComment = () => {

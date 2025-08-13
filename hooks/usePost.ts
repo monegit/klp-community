@@ -155,20 +155,21 @@ export const usePost = () => {
   };
 
   const getPostDetail = async (postId: string) => {
-    const response = await fetchPost(postId);
-
     try {
-      if (response?.userId) {
-        const user = await fetchUserProfileById(response.userId);
+      const response = await fetchPost(postId);
+
+      if (response?.data()?.userId) {
+        const user = await fetchUserProfileById(response.data()?.userId);
+        const postData = response.data();
 
         const post: PostResponse = {
-          postId: response.postId,
-          userId: response.userId || "",
-          title: response.title || "",
-          content: response.content || "",
-          images: response.images || [],
-          createdAt: response.createdAt || "",
-          comments: response.comments || [],
+          postId: response.id,
+          userId: postData?.userId ?? "",
+          title: postData?.title ?? "",
+          content: postData?.content ?? "",
+          images: postData?.images ?? [],
+          createdAt: postData?.createdAt ?? "",
+          comments: postData?.comments ?? [],
         };
 
         return { user, post };

@@ -89,8 +89,8 @@ const fetchUserProfileById = async (userId: string): Promise<UserProfile> => {
       const userData = response.data();
 
       return {
-        nickname: userData.nickname || "",
-        profileImageURL: userData.photoURL || "",
+        nickname: userData.nickname ?? "",
+        profileImageURL: userData.photoURL ?? "",
       };
     }
 

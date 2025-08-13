@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useComment } from "@/hooks/useComment";
@@ -15,12 +15,12 @@ export const usePostDetail = () => {
 
   const [userData, setUserData] = useState<UserProfile | null>(null);
   const [postData, setPostData] = useState<PostResponse | null>(null);
-
+  const [commentInput, setCommentInput] = useState("");
   const [comments, setComments] = useState<Comment[]>([]);
 
-  const onPostDetailLoad = async (userId: string) => {
-    const response = await getPostDetail(userId);
-
+  const onPostDetailLoad = async (postId: string) => {
+    const response = await getPostDetail(postId);
+    console.log(response);
     if (!response) {
       setUserData(null);
       setPostData(null);
@@ -30,42 +30,58 @@ export const usePostDetail = () => {
     setPostData(response?.post || null);
   };
 
-  const onCommentSubmit = async (comment: string) => {
+  const handleSubmitComment = async (comment: string) => {
     if (!user || !comment.trim() || !postData?.postId) return;
 
     try {
       await postComment(user.uid, postData.postId, comment.trim());
+      setCommentInput("");
+      await refreshComments(postData.postId);
     } catch (error) {
       console.log("Error posting comment:", error);
     }
   };
 
-  const refreshComments = async (postId: string) => {
-    if (!postId) return [];
+  const refreshComments = useCallback(
+    async (postId: string) => {
+      if (!postId) return [];
 
-    const response = await getComments(postId);
-    const userIds = response.map((comment) => comment.userId);
+      try {
+        const response = await getComments(postId);
 
-    const userProfiles = await fetchUserProfilesByIds(userIds);
+        if (response.length === 0) {
+          setComments([]);
+          return [];
+        }
 
-    const comments = response.map((comment) => ({
-      ...comment,
-      ...userProfiles[comment.userId],
-    }));
+        const userIds = response.map((comment) => comment.userId);
+        const userProfiles = await fetchUserProfilesByIds(userIds);
 
-    setComments(comments);
+        const comments = response.map((comment) => ({
+          ...comment,
+          nickname: userProfiles[comment.userId]?.nickname || "익명",
+          profileImageURL: userProfiles[comment.userId]?.profileImageURL || "",
+        }));
 
-    return comments;
-  };
+        setComments(comments);
 
-  const onPostUpdate = async () => {};
+        return comments;
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+        return [];
+      }
+    },
+    [getComments]
+  );
 
   return {
     userData,
     postData,
     onPostDetailLoad,
-    onCommentSubmit,
+    handleSubmitComment,
     comments,
     refreshComments,
+    commentInput,
+    setCommentInput,
   };
 };

@@ -11,12 +11,10 @@ import {
   QueryDocumentSnapshot,
   startAfter,
   updateDoc,
-  where,
 } from "firebase/firestore";
 
 import { db } from "@/firebase.config";
 import { uploadImageAsync } from "@/lib/uploadImageAsync";
-import { CreateCommentRequest } from "@/types/comment";
 import { PostRequest, PostResponse } from "@/types/post";
 
 const fetchPosts = async (
@@ -42,42 +40,11 @@ const fetchPost = async (postId: string) => {
     const postData = doc(db, "posts", postId);
     const post = await getDoc(postData);
 
-    return post.data() as PostResponse | undefined;
+    return post;
   } catch (error) {
     console.log("Error fetching post:", error);
 
     return undefined;
-  }
-};
-
-const fetchComment = async (req: CreateCommentRequest) => {
-  try {
-    const collectionRef = collection(db, "comments");
-    const docRef = await addDoc(collectionRef, {
-      ...req,
-      createdAt: new Date().toISOString(),
-    });
-
-    return docRef;
-  } catch (error) {
-    console.error("Error creating comment:", error);
-  }
-};
-
-const fetchCommentedList = async (postId: string) => {
-  try {
-    const q = query(
-      collection(db, "comments"),
-      where("postId", "==", postId),
-      orderBy("createdAt", "asc")
-    );
-
-    const response = await getDocs(q);
-
-    return response;
-  } catch (error) {
-    console.error("Error fetching commented list:", error);
-    return { docs: [] as QueryDocumentSnapshot<PostResponse>[] };
   }
 };
 
@@ -122,8 +89,6 @@ const fetchPostWrite = async (postData: PostRequest) => {
 };
 
 export {
-  fetchComment,
-  fetchCommentedList,
   fetchPost,
   fetchPostDelete,
   fetchPosts,
