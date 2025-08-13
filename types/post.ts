@@ -19,6 +19,9 @@ export interface PostResponse {
   images: string[];
 
   comments: string[];
+
+  nickname?: string;
+  profileImageURL?: string;
 }
 
 export interface ImageItem {
