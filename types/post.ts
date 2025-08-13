@@ -20,3 +20,8 @@ export interface PostResponse {
 
   comments: string[];
 }
+
+export interface ImageItem {
+  uri: string;
+  remote?: boolean;
+}

@@ -49,24 +49,33 @@ const fetchUserProfileImagesByIds = async (
 
 const fetchUserProfilesByIds = async (userIds: string[]) => {
   const result: AccountIdsMap = {};
+  const uniqueIds = Array.from(new Set(userIds.filter(Boolean)));
 
-  try {
-    const q = query(
-      collection(db, "users"),
-      where(documentId(), "in", userIds)
-    );
+  if (uniqueIds.length === 0) return result;
 
-    const response = await getDocs(q);
+  const chunkSize = 10;
 
-    response.forEach((doc) => {
-      const data = doc.data();
-      result[doc.id] = {
-        nickname: data.nickname || "",
-        profileImageURL: data.photoURL || "",
-      };
-    });
-  } catch (error) {
-    console.warn("fetchUserProfilesByIds 실패", error);
+  for (let i = 0; i < uniqueIds.length; i += chunkSize) {
+    const chunk = uniqueIds.slice(i, i + chunkSize);
+
+    try {
+      const q = query(
+        collection(db, "users"),
+        where(documentId(), "in", userIds)
+      );
+
+      const response = await getDocs(q);
+
+      response.forEach((doc) => {
+        const data = doc.data();
+        result[doc.id] = {
+          nickname: data.nickname || "",
+          profileImageURL: data.photoURL || "",
+        };
+      });
+    } catch (error) {
+      console.warn("fetchUserProfilesByIds 실패", error);
+    }
   }
 
   return result;
