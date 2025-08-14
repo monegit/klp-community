@@ -1,7 +1,14 @@
 import { Colors } from "@/constants/Colors";
-import { Image as ExpoImage } from "expo-image";
+import { Image as ExpoImage, ImageStyle } from "expo-image";
 import { useRouter } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TextStyle,
+  View,
+  ViewStyle,
+} from "react-native";
 
 type FirestoreTimestamp = {
   seconds: number;
@@ -50,72 +57,33 @@ export default function Post({
 
   return (
     <Pressable onPress={onPress}>
-      <View
-        style={{
-          padding: 16,
-          backgroundColor: Colors.cardBg,
-          borderRadius: 12,
-          marginBottom: 16,
-          borderWidth: 1,
-          borderColor: Colors.divider,
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 8,
-          }}
-        >
+      <View style={styles.view.component}>
+        <View style={styles.view.header}>
           {profileImageURL ? (
             <ExpoImage
               source={{ uri: profileImageURL }}
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                backgroundColor: Colors.avatarPlaceholder,
-                marginRight: 8,
-              }}
+              style={styles.image.profileImage}
             />
           ) : (
-            <View
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                backgroundColor: Colors.avatarPlaceholder,
-                marginRight: 8,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text style={{ fontSize: 10, color: Colors.subText }}>NA</Text>
-            </View>
+            <View style={styles.image.emptyProfileImage} />
           )}
-          <View style={{ flex: 1 }}>
-            <Text
-              style={{ fontSize: 16, fontWeight: "600", color: Colors.text }}
-              numberOfLines={1}
-            >
+          <View style={styles.view.title}>
+            <Text style={styles.text.title} numberOfLines={1}>
               {title}
             </Text>
-            <Text style={{ fontSize: 11, color: Colors.subText, marginTop: 2 }}>
+            <Text style={styles.text.titleInfo}>
               {nickname ? `${nickname} · ` : ""}
               {formatCreatedAt(createdAt)}
             </Text>
           </View>
         </View>
-        <Text
-          style={{ fontSize: 16, marginBottom: 12, color: Colors.text }}
-          numberOfLines={3}
-        >
+        <Text style={styles.text.content} numberOfLines={3}>
           {content}
         </Text>
         {!!images?.length && (
           <ExpoImage
             source={{ uri: images[0]! }}
-            style={{ width: "100%", height: 200, borderRadius: 8 }}
+            style={styles.image.contentImage}
             contentFit="cover"
             cachePolicy="memory-disk"
           />
@@ -124,3 +92,66 @@ export default function Post({
     </Pressable>
   );
 }
+
+const styles = {
+  view: StyleSheet.create({
+    component: {
+      padding: 16,
+      backgroundColor: Colors.cardBg,
+      borderRadius: 12,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: Colors.divider,
+    } as ViewStyle,
+
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 8,
+    } as ViewStyle,
+
+    title: { flex: 1 } as ViewStyle,
+  }),
+
+  text: StyleSheet.create({
+    title: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: Colors.text,
+    } as TextStyle,
+
+    titleInfo: {
+      fontSize: 11,
+      color: Colors.subText,
+      marginTop: 2,
+    } as TextStyle,
+
+    content: {
+      fontSize: 16,
+      marginBottom: 12,
+      color: Colors.text,
+    } as TextStyle,
+  }),
+
+  image: StyleSheet.create({
+    profileImage: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: Colors.avatarPlaceholder,
+      marginRight: 8,
+    } as ImageStyle,
+
+    emptyProfileImage: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: Colors.avatarPlaceholder,
+      marginRight: 8,
+      alignItems: "center",
+      justifyContent: "center",
+    } as ViewStyle,
+
+    contentImage: { width: "100%", height: 200, borderRadius: 8 } as ImageStyle,
+  }),
+};

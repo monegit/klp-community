@@ -1,16 +1,17 @@
+import { useRouter } from "expo-router";
+import { Alert, SafeAreaView } from "react-native";
+
 import { FloatingActionButton } from "@/components/common/FloatingActionButton";
 import { PostBoard } from "@/components/home/PostBoard";
 import { Colors } from "@/constants/Colors";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "expo-router";
-import { Alert, SafeAreaView } from "react-native";
 
 export default function HomeScreen() {
   const { user } = useAuth();
   const route = useRouter();
 
   return (
-    <SafeAreaView style={{ backgroundColor: Colors.bg, flex: 1 }}>
+    <SafeAreaView style={{ backgroundColor: Colors.backgroundColor, flex: 1 }}>
       <PostBoard />
 
       <FloatingActionButton

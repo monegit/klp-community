@@ -1,7 +1,3 @@
-import { Button } from "@/components/common/Button";
-import { TextInput } from "@/components/common/TextInput";
-import { useAuth } from "@/contexts/AuthContext";
-import { UserData } from "@/types/user";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -11,9 +7,18 @@ import {
   Pressable,
   SafeAreaView,
   ScrollView,
+  StyleSheet,
   Text,
+  TextStyle,
   View,
+  ViewStyle,
 } from "react-native";
+
+import { Button } from "@/components/common/Button";
+import { TextInput } from "@/components/common/TextInput";
+import { Colors } from "@/constants/Colors";
+import { useAuth } from "@/contexts/AuthContext";
+import { UserData } from "@/types/user";
 
 export default function LoginScreen() {
   const route = useRouter();
@@ -42,29 +47,21 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f2f4f7" }}>
+    <SafeAreaView style={styles.view.component}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1 }}
+        style={styles.view.keyboardAvoidingView}
       >
         <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            padding: 24,
-            justifyContent: "center",
-          }}
+          contentContainerStyle={styles.view.scrollView}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={{ alignItems: "center", marginBottom: 40 }}>
-            <Text style={{ fontSize: 28, fontWeight: "700", color: "#111" }}>
-              로그인
-            </Text>
-            <Text style={{ fontSize: 13, color: "#666", marginTop: 8 }}>
-              계정 정보를 입력해주세요
-            </Text>
+          <View style={styles.view.header}>
+            <Text style={styles.text.title}>로그인</Text>
+            <Text style={styles.text.subtitle}>계정 정보를 입력해주세요</Text>
           </View>
 
-          <View style={{ gap: 18 }}>
+          <View style={styles.view.content}>
             <TextInput
               label="이메일"
               requiredMark
@@ -88,7 +85,7 @@ export default function LoginScreen() {
             />
           </View>
 
-          <View style={{ marginTop: 32 }}>
+          <View style={styles.view.footer}>
             <Button
               title="로그인"
               onPress={submit}
@@ -97,9 +94,9 @@ export default function LoginScreen() {
             />
             <Pressable
               onPress={() => route.push("/registry")}
-              style={{ marginTop: 18, alignItems: "center" }}
+              style={styles.button.registry}
             >
-              <Text style={{ fontSize: 13, color: "#007AFF" }}>
+              <Text style={styles.text.registry}>
                 아직 계정이 없으신가요? 회원가입
               </Text>
             </Pressable>
@@ -109,3 +106,61 @@ export default function LoginScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = {
+  view: StyleSheet.create({
+    component: {
+      flex: 1,
+      backgroundColor: Colors.backgroundColor,
+    } as ViewStyle,
+
+    keyboardAvoidingView: {
+      flex: 1,
+    } as ViewStyle,
+
+    scrollView: {
+      flexGrow: 1,
+      padding: 24,
+      justifyContent: "center",
+    } as ViewStyle,
+
+    header: {
+      alignItems: "center",
+      marginBottom: 40,
+    } as ViewStyle,
+
+    content: {
+      gap: 18,
+    } as ViewStyle,
+
+    footer: {
+      marginTop: 32,
+    } as ViewStyle,
+  }),
+
+  text: StyleSheet.create({
+    title: {
+      fontSize: 28,
+      fontWeight: "700",
+      color: Colors.text,
+    } as TextStyle,
+
+    subtitle: {
+      fontSize: 13,
+      color: Colors.subText,
+      marginTop: 8,
+    } as TextStyle,
+
+    registry: {
+      fontSize: 13,
+      color: Colors.primary,
+    } as TextStyle,
+  }),
+
+  button: StyleSheet.create({
+    registry: {
+      marginTop: 18,
+      alignItems: "center",
+    } as ViewStyle,
+  }),
+};

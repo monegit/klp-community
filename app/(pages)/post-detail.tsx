@@ -1,23 +1,25 @@
-import { TextInput } from "@/components/common/TextInput";
-import { Image } from "expo-image";
+import { Image, ImageStyle } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   RefreshControl,
   SafeAreaView,
   ScrollView,
+  StyleSheet,
   Text,
+  TextStyle,
   View,
+  ViewStyle,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/common/Button";
+import { TextInput } from "@/components/common/TextInput";
 import { Colors } from "@/constants/Colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCreatedAt } from "@/lib/formatCreatedAt";
 import { fetchPostDelete } from "@/services/post";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { usePostDetail } from "../../hooks/usePostDetail";
 
 export default function PostDetailScreen() {
@@ -62,22 +64,9 @@ export default function PostDetailScreen() {
     }
   }, [postData?.images]);
 
-  if (loading) {
-    return (
-      <SafeAreaView
-        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-      >
-        <ActivityIndicator size="large" />
-        <Text style={{ marginTop: 10 }}>로딩 중...</Text>
-      </SafeAreaView>
-    );
-  }
-
   if (!postData) {
     return (
-      <SafeAreaView
-        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-      >
+      <SafeAreaView style={styles.view.component_loading}>
         <Text>게시글을 찾을 수 없습니다.</Text>
       </SafeAreaView>
     );
@@ -115,7 +104,7 @@ export default function PostDetailScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.bg }}>
+    <SafeAreaView style={styles.view.component}>
       <ScrollView
         refreshControl={
           <RefreshControl
@@ -123,61 +112,34 @@ export default function PostDetailScreen() {
             onRefresh={() => refreshComments(postId as string)}
           />
         }
-        contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 120 }}
+        contentContainerStyle={styles.view.scrollView}
       >
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 12,
-          }}
-        >
-          <View style={{ flex: 1 }}>
-            <Text
-              style={{ fontSize: 20, fontWeight: "600", color: Colors.text }}
-              numberOfLines={2}
-            >
+        <View style={styles.view.contentView}>
+          <View style={styles.view.header}>
+            <Text style={styles.text.title} numberOfLines={2}>
               {postData.title}
             </Text>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginTop: 6,
-              }}
-            >
+
+            <View style={styles.view.profileImage}>
               {userData?.profileImageURL ? (
                 <Image
                   source={{ uri: userData.profileImageURL }}
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 14,
-                    backgroundColor: Colors.avatarPlaceholder,
-                    marginRight: 8,
-                  }}
+                  style={styles.image.profileImage}
                 />
               ) : (
-                <View
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 14,
-                    backgroundColor: Colors.avatarPlaceholder,
-                    marginRight: 8,
-                  }}
-                />
+                <View style={styles.image.emptyProfileImage} />
               )}
-              <Text style={{ color: Colors.subText, fontSize: 12 }}>
+              <Text style={styles.text.headerInfo}>
                 {userData?.nickname ? `${userData.nickname} · ` : ""}
                 {formatCreatedAt(postData.createdAt)}
               </Text>
             </View>
           </View>
+
           {isOwner && (
-            <View style={{ flexDirection: "row", gap: 8 }}>
+            <View style={styles.view.editableView}>
               <Button title="수정" onPress={goEditPage} />
+
               <Button
                 title={deleting ? "삭제중" : "삭제"}
                 onPress={onDelete}
@@ -187,22 +149,15 @@ export default function PostDetailScreen() {
             </View>
           )}
         </View>
-        {/* 상단으로 이동했으므로 제거 */}
-        <Text style={{ fontSize: 14, lineHeight: 20, color: Colors.text }}>
-          {postData.content}
-        </Text>
+
+        <Text style={styles.text.content}>{postData.content}</Text>
         {!!postData.images.length && (
           <View style={{ gap: 12 }}>
             {postData.images.map((url) => (
               <Image
                 key={url}
                 source={{ uri: url }}
-                style={{
-                  width: "100%",
-                  height: 220,
-                  borderRadius: 8,
-                  backgroundColor: Colors.cardBg,
-                }}
+                style={styles.image.contentImage}
                 contentFit="cover"
                 cachePolicy="memory-disk"
               />
@@ -210,78 +165,32 @@ export default function PostDetailScreen() {
           </View>
         )}
 
-        <View
-          style={{
-            borderTopWidth: 1,
-            borderTopColor: Colors.divider,
-            paddingTop: 12,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 8,
-            }}
-          >
+        <View style={styles.view.commentView}>
+          <View style={styles.view.commentViewHeader}>
             <Text style={{ fontWeight: "600", color: Colors.text }}>
-              댓글 {comments.length}
+              댓글 {comments.length}개
             </Text>
           </View>
           {comments.map((comment) => (
-            <View
-              key={comment.commentId}
-              style={{
-                flexDirection: "row",
-                gap: 10,
-                paddingVertical: 10,
-                borderBottomWidth: 1,
-                borderBottomColor: Colors.divider,
-              }}
-            >
+            <View key={comment.commentId} style={styles.view.comment}>
               {comment.profileImageURL ? (
                 <Image
                   source={{ uri: comment.profileImageURL }}
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 14,
-                    backgroundColor: Colors.avatarPlaceholder,
-                  }}
+                  style={styles.image.profileImage}
                 />
               ) : (
-                <View
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 14,
-                    backgroundColor: Colors.avatarPlaceholder,
-                  }}
-                />
+                <View style={styles.image.emptyProfileImage} />
               )}
+
               <View style={{ flex: 1 }}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "baseline",
-                    gap: 6,
-                  }}
-                >
+                <View style={styles.view.commentInfo}>
                   {!!comment.nickname && (
-                    <Text style={{ fontSize: 12, color: Colors.subText }}>
-                      {comment.nickname}
+                    <Text style={styles.text.commentInfo}>
+                      {comment.nickname} {formatCreatedAt(comment.createdAt)}
                     </Text>
                   )}
-                  <Text style={{ fontSize: 10, color: Colors.muted }}>
-                    {formatCreatedAt(comment.createdAt)}
-                  </Text>
                 </View>
-                <Text
-                  style={{ fontSize: 14, color: Colors.text, marginTop: 2 }}
-                >
-                  {comment.comment}
-                </Text>
+                <Text style={styles.text.comment}>{comment.comment}</Text>
               </View>
             </View>
           ))}
@@ -292,21 +201,12 @@ export default function PostDetailScreen() {
       </ScrollView>
 
       <View
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 0,
-          padding: 12,
-          backgroundColor: Colors.cardBg,
-          borderTopWidth: 1,
-          borderTopColor: Colors.divider,
-          paddingBottom: insets.bottom,
-          flexDirection: "row",
-          gap: 8,
-        }}
+        style={[
+          styles.view.commentInputContainer,
+          { paddingBottom: insets.bottom },
+        ]}
       >
-        <View style={{ flex: 1, justifyContent: "center" }}>
+        <View style={styles.view.commentInput}>
           <TextInput
             value={commentInput}
             onChangeText={setCommentInput}
@@ -324,3 +224,117 @@ export default function PostDetailScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = {
+  view: StyleSheet.create({
+    component: {
+      flex: 1,
+      backgroundColor: Colors.backgroundColor,
+    } as ViewStyle,
+
+    component_loading: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: Colors.backgroundColor,
+    } as ViewStyle,
+
+    scrollView: { padding: 16, gap: 16, paddingBottom: 120 } as ViewStyle,
+
+    contentView: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+    } as ViewStyle,
+
+    header: { flex: 1 } as ViewStyle,
+
+    profileImage: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: 6,
+    } as ViewStyle,
+
+    editableView: { flexDirection: "row", gap: 8 } as ViewStyle,
+
+    commentView: {
+      borderTopWidth: 1,
+      borderTopColor: Colors.divider,
+      paddingTop: 12,
+    } as ViewStyle,
+
+    commentViewHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8,
+    } as ViewStyle,
+
+    comment: {
+      flexDirection: "row",
+      gap: 10,
+      paddingVertical: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: Colors.divider,
+    } as ViewStyle,
+
+    commentInfo: {
+      flexDirection: "row",
+      alignItems: "baseline",
+      gap: 6,
+    } as ViewStyle,
+
+    commentInputContainer: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
+      padding: 12,
+      backgroundColor: Colors.cardBg,
+      borderTopWidth: 1,
+      borderTopColor: Colors.divider,
+      flexDirection: "row",
+      gap: 8,
+    } as ViewStyle,
+
+    commentInput: { flex: 1, justifyContent: "center" } as ViewStyle,
+  }),
+
+  text: StyleSheet.create({
+    title: { fontSize: 20, fontWeight: "600", color: Colors.text } as TextStyle,
+
+    headerInfo: { color: Colors.subText, fontSize: 12 } as TextStyle,
+
+    content: { fontSize: 14, lineHeight: 20, color: Colors.text } as TextStyle,
+
+    commentInfo: { fontSize: 12, color: Colors.subText } as TextStyle,
+
+    comment: { fontSize: 14, color: Colors.text, marginTop: 2 } as TextStyle,
+  }),
+
+  image: StyleSheet.create({
+    profileImage: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: Colors.avatarPlaceholder,
+      marginRight: 8,
+    } as ImageStyle,
+
+    emptyProfileImage: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: Colors.avatarPlaceholder,
+      marginRight: 8,
+    } as ImageStyle,
+
+    contentImage: {
+      width: "100%",
+      height: 220,
+      borderRadius: 8,
+      backgroundColor: Colors.cardBg,
+    } as ImageStyle,
+  }),
+};

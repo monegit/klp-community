@@ -7,12 +7,16 @@ import {
   Pressable,
   SafeAreaView,
   ScrollView,
+  StyleSheet,
   Text,
+  TextStyle,
   View,
+  ViewStyle,
 } from "react-native";
 
 import { Button } from "@/components/common/Button";
 import { TextInput } from "@/components/common/TextInput";
+import Colors from "@/constants/Colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserData } from "@/types/user";
 
@@ -47,29 +51,23 @@ export default function RegistryScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f2f4f7" }}>
+    <SafeAreaView style={styles.view.component}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}
       >
         <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            padding: 24,
-            justifyContent: "center",
-          }}
+          contentContainerStyle={styles.view.scrollView}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={{ alignItems: "center", marginBottom: 40 }}>
-            <Text style={{ fontSize: 28, fontWeight: "700", color: "#111" }}>
-              회원가입
-            </Text>
-            <Text style={{ fontSize: 13, color: "#666", marginTop: 8 }}>
+          <View style={styles.view.header}>
+            <Text style={styles.text.title}>회원가입</Text>
+            <Text style={styles.text.subtitle}>
               필수 정보를 입력해 계정을 만들어요
             </Text>
           </View>
 
-          <View style={{ gap: 18 }}>
+          <View style={styles.view.content}>
             <TextInput
               label="이메일"
               requiredMark
@@ -102,7 +100,7 @@ export default function RegistryScreen() {
             />
           </View>
 
-          <View style={{ marginTop: 32 }}>
+          <View style={styles.view.footer}>
             <Button
               title="회원가입"
               onPress={submit}
@@ -111,7 +109,7 @@ export default function RegistryScreen() {
             />
             <Pressable
               onPress={() => route.back()}
-              style={{ marginTop: 18, alignItems: "center" }}
+              style={styles.button.submit}
             >
               <Text style={{ fontSize: 13, color: "#007AFF" }}>
                 이미 계정이 있나요? 로그인
@@ -123,3 +121,40 @@ export default function RegistryScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = {
+  view: StyleSheet.create({
+    component: {
+      flex: 1,
+      backgroundColor: Colors.backgroundColor,
+    } as ViewStyle,
+
+    scrollView: {
+      flexGrow: 1,
+      padding: 24,
+      justifyContent: "center",
+    } as ViewStyle,
+
+    header: { alignItems: "center", marginBottom: 40 } as ViewStyle,
+
+    content: { gap: 18 } as ViewStyle,
+
+    footer: { marginTop: 32 } as ViewStyle,
+  }),
+
+  text: StyleSheet.create({
+    title: { fontSize: 28, fontWeight: "700", color: Colors.text } as TextStyle,
+
+    subtitle: {
+      fontSize: 13,
+      color: Colors.subText,
+      marginTop: 8,
+    } as TextStyle,
+
+    registry: { fontSize: 13, color: Colors.primary } as TextStyle,
+  }),
+
+  button: StyleSheet.create({
+    submit: { marginTop: 18, alignItems: "center" } as ViewStyle,
+  }),
+};

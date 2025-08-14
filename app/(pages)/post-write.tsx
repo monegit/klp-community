@@ -49,7 +49,7 @@ export default function PostWriteScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.bg }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backgroundColor }}>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 20 }}>
         <Text style={{ fontSize: 20, fontWeight: "600" }}>
           {isEdit ? "게시글 수정" : "게시글 작성"}
