@@ -1,23 +1,24 @@
+import { TextInput } from "@/components/common/TextInput";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Pressable,
   RefreshControl,
   SafeAreaView,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from "react-native";
 
+import { Button } from "@/components/common/Button";
 import { Colors } from "@/constants/Colors";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatCreatedAt } from "@/lib/formatCreatedAt";
 import { fetchPostDelete } from "@/services/post";
-import { usePostDetail } from "./_hooks/usePostDetail";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { usePostDetail } from "../../hooks/usePostDetail";
 
 export default function PostDetailScreen() {
   const {
@@ -31,6 +32,7 @@ export default function PostDetailScreen() {
     setCommentInput,
   } = usePostDetail();
 
+  const insets = useSafeAreaInsets();
   const { postId } = useLocalSearchParams();
   const router = useRouter();
   const { user } = useAuth();
@@ -45,14 +47,14 @@ export default function PostDetailScreen() {
     setLoading(true);
     onPostDetailLoad(postId as string);
     setLoading(false);
-  }, []);
+  }, [postId, onPostDetailLoad]);
 
   useEffect(() => {
     if (!postId) return;
     setCommentsRefreshing(true);
     refreshComments(postId as string);
     setCommentsRefreshing(false);
-  }, [postId]);
+  }, [postId, refreshComments]);
 
   useEffect(() => {
     if (postData?.images?.length) {
@@ -175,31 +177,13 @@ export default function PostDetailScreen() {
           </View>
           {isOwner && (
             <View style={{ flexDirection: "row", gap: 8 }}>
-              <Pressable
-                onPress={goEditPage}
-                style={{
-                  paddingHorizontal: 12,
-                  paddingVertical: 6,
-                  backgroundColor: Colors.primary,
-                  borderRadius: 8,
-                }}
-              >
-                <Text style={{ color: "#fff", fontSize: 12 }}>수정</Text>
-              </Pressable>
-              <Pressable
+              <Button title="수정" onPress={goEditPage} />
+              <Button
+                title={deleting ? "삭제중" : "삭제"}
                 onPress={onDelete}
                 disabled={deleting}
-                style={{
-                  paddingHorizontal: 12,
-                  paddingVertical: 6,
-                  backgroundColor: deleting ? "#ccc" : Colors.danger,
-                  borderRadius: 8,
-                }}
-              >
-                <Text style={{ color: "#fff", fontSize: 12 }}>
-                  {deleting ? "삭제중" : "삭제"}
-                </Text>
-              </Pressable>
+                variant="danger"
+              />
             </View>
           )}
         </View>
@@ -244,20 +228,6 @@ export default function PostDetailScreen() {
             <Text style={{ fontWeight: "600", color: Colors.text }}>
               댓글 {comments.length}
             </Text>
-            <Pressable
-              onPress={() => refreshComments(postId as string)}
-              disabled={commentsRefreshing}
-              style={{
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-                borderRadius: 16,
-                backgroundColor: commentsRefreshing ? "#ccc" : Colors.primary,
-              }}
-            >
-              <Text style={{ color: "#fff", fontSize: 12 }}>
-                {commentsRefreshing ? "갱신중..." : "새로고침"}
-              </Text>
-            </Pressable>
           </View>
           {comments.map((comment) => (
             <View
@@ -331,38 +301,25 @@ export default function PostDetailScreen() {
           backgroundColor: Colors.cardBg,
           borderTopWidth: 1,
           borderTopColor: Colors.divider,
+          paddingBottom: insets.bottom,
           flexDirection: "row",
           gap: 8,
         }}
       >
-        <TextInput
-          value={commentInput}
-          onChangeText={setCommentInput}
-          placeholder={user ? "댓글 입력..." : "로그인 후 작성 가능"}
-          style={{
-            flex: 1,
-            borderWidth: 1,
-            borderColor: Colors.border,
-            borderRadius: 20,
-            paddingHorizontal: 14,
-            paddingVertical: 8,
-            backgroundColor: Colors.cardBg,
-          }}
-          multiline
-        />
-        <Pressable
+        <View style={{ flex: 1, justifyContent: "center" }}>
+          <TextInput
+            value={commentInput}
+            onChangeText={setCommentInput}
+            placeholder={user ? "댓글 입력..." : "로그인 후 작성 가능"}
+            multiline={false}
+            containerStyle={{ marginBottom: 0 }}
+          />
+        </View>
+        <Button
+          title="등록"
           onPress={() => handleSubmitComment(commentInput)}
-          // disabled={!user || !commentInput.trim()}
-          style={{
-            justifyContent: "center",
-            paddingHorizontal: 16,
-            backgroundColor:
-              !user || !commentInput.trim() ? "#ccc" : Colors.primary,
-            borderRadius: 20,
-          }}
-        >
-          <Text style={{ color: "#fff", fontWeight: "600" }}>등록</Text>
-        </Pressable>
+          disabled={!user || !commentInput.trim()}
+        />
       </View>
     </SafeAreaView>
   );

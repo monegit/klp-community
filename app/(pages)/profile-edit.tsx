@@ -1,4 +1,5 @@
-import { AppButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
+import { TextInput } from "@/components/common/TextInput";
 import React from "react";
 import {
   ActivityIndicator,
@@ -7,10 +8,9 @@ import {
   SafeAreaView,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from "react-native";
-import { useProfileEdit } from "./_hooks/useProfileEdit";
+import { useProfileEdit } from "../../hooks/useProfileEdit";
 // useFocusEffect 제거: 최초 1회만 로드하도록 변경
 
 export default function ProfileEditScreen() {
@@ -72,22 +72,17 @@ export default function ProfileEditScreen() {
         </View>
 
         <View style={{ gap: 8 }}>
-          <Text style={{ fontSize: 14, fontWeight: "600" }}>닉네임</Text>
           <TextInput
+            label="닉네임"
+            requiredMark
             value={nickname}
             onChangeText={setNickname}
             placeholder="닉네임 입력"
-            style={{
-              borderWidth: 1,
-              borderColor: "#ccc",
-              borderRadius: 8,
-              paddingHorizontal: 12,
-              paddingVertical: 10,
-            }}
             editable={!isSaveNickname}
           />
-          <AppButton
+          <Button
             title={isSaveNickname ? "저장 중..." : "닉네임 저장"}
+            type="submit"
             onPress={onSaveNickname}
             disabled={isSaveNickname || !nickname.trim()}
           />

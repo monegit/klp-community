@@ -8,11 +8,11 @@ import {
   SafeAreaView,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from "react-native";
 
-import { AppButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
+import { TextInput } from "@/components/common/TextInput";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserData } from "@/types/user";
 
@@ -70,79 +70,44 @@ export default function RegistryScreen() {
           </View>
 
           <View style={{ gap: 18 }}>
-            <View style={{ gap: 8 }}>
-              <Text style={{ fontSize: 13, fontWeight: "600", color: "#333" }}>
-                이메일
-              </Text>
-              <TextInput
-                placeholder="example@domain.com"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                value={accountData.email}
-                onChangeText={(v) =>
-                  setAccountData((prev) => ({ ...prev, email: v }))
-                }
-                style={{
-                  backgroundColor: "#fff",
-                  borderWidth: 1,
-                  borderColor: "#d0d5dd",
-                  borderRadius: 10,
-                  paddingHorizontal: 14,
-                  paddingVertical: 12,
-                  fontSize: 14,
-                }}
-              />
-            </View>
-            <View style={{ gap: 8 }}>
-              <Text style={{ fontSize: 13, fontWeight: "600", color: "#333" }}>
-                비밀번호
-              </Text>
-              <TextInput
-                placeholder="8자 이상"
-                secureTextEntry
-                value={accountData.password}
-                onChangeText={(v) =>
-                  setAccountData((prev) => ({ ...prev, password: v }))
-                }
-                style={{
-                  backgroundColor: "#fff",
-                  borderWidth: 1,
-                  borderColor: "#d0d5dd",
-                  borderRadius: 10,
-                  paddingHorizontal: 14,
-                  paddingVertical: 12,
-                  fontSize: 14,
-                }}
-              />
-            </View>
-            <View style={{ gap: 8 }}>
-              <Text style={{ fontSize: 13, fontWeight: "600", color: "#333" }}>
-                닉네임
-              </Text>
-              <TextInput
-                placeholder="표시할 닉네임"
-                value={accountData.nickname}
-                onChangeText={(v) =>
-                  setAccountData((prev) => ({ ...prev, nickname: v }))
-                }
-                style={{
-                  backgroundColor: "#fff",
-                  borderWidth: 1,
-                  borderColor: "#d0d5dd",
-                  borderRadius: 10,
-                  paddingHorizontal: 14,
-                  paddingVertical: 12,
-                  fontSize: 14,
-                }}
-              />
-            </View>
+            <TextInput
+              label="이메일"
+              requiredMark
+              placeholder="example@domain.com"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              value={accountData.email}
+              onChangeText={(v) =>
+                setAccountData((prev) => ({ ...prev, email: v }))
+              }
+            />
+            <TextInput
+              label="비밀번호"
+              requiredMark
+              placeholder="8자 이상"
+              secureTextEntry
+              value={accountData.password}
+              onChangeText={(v) =>
+                setAccountData((prev) => ({ ...prev, password: v }))
+              }
+            />
+            <TextInput
+              label="닉네임"
+              requiredMark
+              placeholder="표시할 닉네임"
+              value={accountData.nickname}
+              onChangeText={(v) =>
+                setAccountData((prev) => ({ ...prev, nickname: v }))
+              }
+            />
           </View>
 
           <View style={{ marginTop: 32 }}>
-            <AppButton
+            <Button
               title="회원가입"
               onPress={submit}
               disabled={!canSubmit}
+              type="submit"
             />
             <Pressable
               onPress={() => route.back()}

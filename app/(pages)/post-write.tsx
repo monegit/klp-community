@@ -7,12 +7,12 @@ import {
   SafeAreaView,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from "react-native";
 
+import { TextInput } from "@/components/common/TextInput";
 import { Colors } from "@/constants/Colors";
-import { usePostWrite } from "./_hooks/usePostWrite";
+import { usePostWrite } from "../../hooks/usePostWrite";
 
 export default function PostWriteScreen() {
   const { postId } = useLocalSearchParams();
@@ -54,42 +54,27 @@ export default function PostWriteScreen() {
         <Text style={{ fontSize: 20, fontWeight: "600" }}>
           {isEdit ? "게시글 수정" : "게시글 작성"}
         </Text>
-        <View style={{ gap: 6 }}>
-          <Text style={{ fontSize: 14, fontWeight: "500" }}>제목</Text>
-          <TextInput
-            value={postTemplate.title}
-            onChangeText={(value) =>
-              setPostTemplate((prev) => ({ ...prev, title: value }))
-            }
-            placeholder="제목을 입력하세요"
-            style={{
-              borderWidth: 1,
-              borderColor: Colors.border,
-              borderRadius: 8,
-              paddingHorizontal: 12,
-              paddingVertical: 10,
-            }}
-          />
-        </View>
-        <View style={{ gap: 6 }}>
-          <Text style={{ fontSize: 14, fontWeight: "500" }}>내용</Text>
-          <TextInput
-            value={postTemplate.content}
-            onChangeText={(value) =>
-              setPostTemplate((prev) => ({ ...prev, content: value }))
-            }
-            placeholder="내용을 입력하세요"
-            multiline
-            style={{
-              borderWidth: 1,
-              borderColor: Colors.border,
-              borderRadius: 8,
-              minHeight: 140,
-              textAlignVertical: "top",
-              padding: 12,
-            }}
-          />
-        </View>
+        <TextInput
+          label="제목"
+          value={postTemplate.title}
+          onChangeText={(value) =>
+            setPostTemplate((prev) => ({ ...prev, title: value }))
+          }
+          placeholder="제목을 입력하세요"
+          requiredMark
+          autoCapitalize="none"
+          returnKeyType="next"
+        />
+        <TextInput
+          label="내용"
+          value={postTemplate.content}
+          onChangeText={(value) =>
+            setPostTemplate((prev) => ({ ...prev, content: value }))
+          }
+          placeholder="내용을 입력하세요"
+          multiline
+          textAlignVertical="top"
+        />
         <View style={{ gap: 10 }}>
           <View
             style={{

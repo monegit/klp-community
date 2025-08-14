@@ -1,3 +1,4 @@
+import Colors from "@/constants/Colors";
 import React from "react";
 import {
   ActivityIndicator,
@@ -9,6 +10,7 @@ import {
 } from "react-native";
 
 type Variant = "primary" | "secondary" | "danger" | "ghost";
+type ButtonType = "submit" | "button";
 
 interface AppButtonProps {
   title: string;
@@ -16,43 +18,59 @@ interface AppButtonProps {
   disabled?: boolean;
   loading?: boolean;
   variant?: Variant;
+  type?: ButtonType;
   style?: ViewStyle | ViewStyle[];
 }
 
 const variantStyles: Record<
   Variant,
-  { bg: string; color: string; border?: string }
+  { backgroundColor: string; color: string; border?: string }
 > = {
-  primary: { bg: "#007AFF", color: "#fff" },
-  secondary: { bg: "#5856D6", color: "#fff" },
-  danger: { bg: "#FF3B30", color: "#fff" },
-  ghost: { bg: "transparent", color: "#007AFF" },
+  primary: { backgroundColor: Colors.primary, color: "#fff" },
+  secondary: { backgroundColor: Colors.secondary, color: "#fff" },
+  danger: { backgroundColor: Colors.danger, color: "#fff" },
+  ghost: { backgroundColor: "transparent", color: "#007AFF" },
 };
 
-export const AppButton: React.FC<AppButtonProps> = ({
+const buttonTypeStyles: Record<ButtonType, ViewStyle> = {
+  submit: { width: "auto", paddingHorizontal: 18, paddingVertical: 14 },
+  button: { width: "auto", paddingVertical: 8, paddingHorizontal: 12 },
+};
+
+export const Button: React.FC<AppButtonProps> = ({
   title,
   onPress,
   disabled,
   loading,
   variant = "primary",
+  type = "button",
   style,
 }) => {
-  const vs = variantStyles[variant];
+  const variantStyle = variantStyles[variant];
+  const variantType = buttonTypeStyles[type];
   const dimmed = disabled || loading;
   return (
     <Pressable
       onPress={dimmed ? undefined : onPress}
       style={({ pressed }) => [
         styles.base,
-        { backgroundColor: vs.bg, opacity: dimmed ? 0.5 : pressed ? 0.8 : 1 },
+        {
+          width: variantType.width,
+          paddingHorizontal: variantType.paddingHorizontal,
+          paddingVertical: variantType.paddingVertical,
+          backgroundColor: variantStyle.backgroundColor,
+          opacity: dimmed ? 0.5 : pressed ? 0.8 : 1,
+        },
         variant === "ghost" && styles.ghost,
         style,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={vs.color} size="small" />
+        <ActivityIndicator color={variantStyle.color} size="small" />
       ) : (
-        <Text style={[styles.title, { color: vs.color }]}>{title}</Text>
+        <Text style={[styles.title, { color: variantStyle.color }]}>
+          {title}
+        </Text>
       )}
     </Pressable>
   );
@@ -60,8 +78,9 @@ export const AppButton: React.FC<AppButtonProps> = ({
 
 const styles = StyleSheet.create({
   base: {
-    paddingVertical: 14,
-    paddingHorizontal: 18,
+    // flex: 1,
+    // paddingVertical: 14,
+    // paddingHorizontal: 18,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
@@ -76,4 +95,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AppButton;
+export default Button;

@@ -1,4 +1,5 @@
-import { AppButton } from "@/components/common/Button";
+import { Button } from "@/components/common/Button";
+import { TextInput } from "@/components/common/TextInput";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserData } from "@/types/user";
 import { useRouter } from "expo-router";
@@ -11,7 +12,6 @@ import {
   SafeAreaView,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from "react-native";
 
@@ -65,65 +65,36 @@ export default function LoginScreen() {
           </View>
 
           <View style={{ gap: 18 }}>
-            <View style={{ gap: 8 }}>
-              <Text style={{ fontSize: 13, fontWeight: "600", color: "#333" }}>
-                이메일
-              </Text>
-              <TextInput
-                placeholder="example@domain.com"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                value={accountData.email}
-                onChangeText={(value) =>
-                  setAccountData((prev) => ({ ...prev, email: value }))
-                }
-                style={{
-                  backgroundColor: "#fff",
-                  borderWidth: 1,
-                  borderColor: "#d0d5dd",
-                  borderRadius: 10,
-                  paddingHorizontal: 14,
-                  paddingVertical: 12,
-                  fontSize: 14,
-                }}
-              />
-            </View>
-            <View style={{ gap: 8 }}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Text
-                  style={{ fontSize: 13, fontWeight: "600", color: "#333" }}
-                >
-                  비밀번호
-                </Text>
-                {/* 향후 비밀번호 찾기 링크 가능 */}
-              </View>
-              <TextInput
-                placeholder="••••••••"
-                secureTextEntry
-                value={accountData.password}
-                onChangeText={(value) =>
-                  setAccountData((prev) => ({ ...prev, password: value }))
-                }
-                style={{
-                  backgroundColor: "#fff",
-                  borderWidth: 1,
-                  borderColor: "#d0d5dd",
-                  borderRadius: 10,
-                  paddingHorizontal: 14,
-                  paddingVertical: 12,
-                  fontSize: 14,
-                }}
-              />
-            </View>
+            <TextInput
+              label="이메일"
+              requiredMark
+              placeholder="example@domain.com"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              value={accountData.email}
+              onChangeText={(value) =>
+                setAccountData((prev) => ({ ...prev, email: value }))
+              }
+            />
+            <TextInput
+              label="비밀번호"
+              requiredMark
+              placeholder="••••••••"
+              secureTextEntry
+              value={accountData.password}
+              onChangeText={(value) =>
+                setAccountData((prev) => ({ ...prev, password: value }))
+              }
+            />
           </View>
 
           <View style={{ marginTop: 32 }}>
-            <AppButton title="로그인" onPress={submit} disabled={!canSubmit} />
+            <Button
+              title="로그인"
+              onPress={submit}
+              disabled={!canSubmit}
+              type="submit"
+            />
             <Pressable
               onPress={() => route.push("/registry")}
               style={{ marginTop: 18, alignItems: "center" }}
