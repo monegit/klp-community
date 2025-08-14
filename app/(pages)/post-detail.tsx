@@ -47,14 +47,14 @@ export default function PostDetailScreen() {
     setLoading(true);
     onPostDetailLoad(postId as string);
     setLoading(false);
-  }, [postId, onPostDetailLoad]);
+  }, []);
 
   useEffect(() => {
     if (!postId) return;
     setCommentsRefreshing(true);
     refreshComments(postId as string);
     setCommentsRefreshing(false);
-  }, [postId, refreshComments]);
+  }, []);
 
   useEffect(() => {
     if (postData?.images?.length) {
